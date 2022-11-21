@@ -5,6 +5,11 @@ plugins {
 android {
     namespace 'com.mycompany.googletest'
     compileSdk 33
+    lintOptions {
+        abortOnError false
+        absolutePaths false
+        lintConfig file('lint.xml')
+    }
     packagingOptions {
         exclude 'META-INF/DEPENDENCIES'
         exclude 'META-INF/LICENSE'
@@ -49,7 +54,7 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.4'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.0'
-    implementation 'com.google.api-client:google-api-client:1.33.0'
+    implementation 'com.google.api-client:google-api-client:2.0.0'
     implementation 'com.google.apis:google-api-services-drive:v3-rev197-1.25.0'
     implementation 'com.google.auth:google-auth-library-oauth2-http:0.1.0'
     implementation 'com.google.api-client:google-api-client:2.0.0'

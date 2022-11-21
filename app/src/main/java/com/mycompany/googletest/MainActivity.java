@@ -30,7 +30,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String APPLICATION_NAME = "Google Drive API Java Quickstart";
+    private static final String APPLICATION_NAME = "GoogleTest";
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
     private static final String TOKENS_DIRECTORY_PATH = "682017860274-fqnfcp7dn7rfcoue1cs98oq0sd9g5at1.apps.googleusercontent.coms";
 
@@ -41,7 +41,13 @@ public class MainActivity extends AppCompatActivity {
     private static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT)
             throws IOException {
         // Load client secrets.
-        InputStream in = DriveQuickstart.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
+        //InputStream in = MainActivity.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
+        InputStream in = null;
+        try {
+            in = MainActivity.class.newInstance().openFileInput(CREDENTIALS_FILE_PATH);
+        } catch (IllegalAccessException | InstantiationException e) {
+            e.printStackTrace();
+        }
         if (in == null) {
             throw new FileNotFoundException("Resource not found: " + CREDENTIALS_FILE_PATH);
         }
@@ -55,32 +61,36 @@ public class MainActivity extends AppCompatActivity {
                 .setAccessType("offline")
                 .build();
         LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
-        Credential credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
-        //returns an authorized Credential object.
-        return credential;
+        return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        final NetHttpTransport HTTP_TRANSPORT;
+        Drive service = null;
         try {
-            createClient();
+            HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
+            service = new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
+                    .setApplicationName(APPLICATION_NAME)
+                    .build();
         } catch (GeneralSecurityException | IOException e) {
             e.printStackTrace();
         }
-    }
 
-    private void createClient() throws GeneralSecurityException, IOException {
-        final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-        Drive service = new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
-                .setApplicationName(APPLICATION_NAME)
-                .build();
-
-        FileList result = service.files().list()
-                .setPageSize(10)
-                .setFields("nextPageToken, files(id, name)")
-                .execute();
+        // Print the names and IDs for up to 10 files.
+        FileList result = null;
+        try {
+            assert service != null;
+            result = service.files().list()
+                    .setPageSize(10)
+                    .setFields("nextPageToken, files(id, name)")
+                    .execute();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        assert result != null;
         List<File> files = result.getFiles();
         if (files == null || files.isEmpty()) {
             System.out.println("No files found.");
