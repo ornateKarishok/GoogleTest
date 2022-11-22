@@ -37,7 +37,6 @@ public class GoogleDriveService {
     private DriveClient driveClient;
     private DriveResourceClient driveResourceClient;
     private GoogleSignInAccount signInAccount;
-    private GoogleSignInClient googleSignInClient;
 
 
     public static class Companion {
@@ -51,7 +50,15 @@ public class GoogleDriveService {
         static final int REQUEST_CODE_SIGN_IN = 101;
         static final String TAG = "GoogleDriveService";
     }
-
+    Lazy<GoogleSignInClient> googleSignInClient = kotlin.LazyKt.lazy(
+            val builder = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+        for (scope in SCOPES) {
+            builder.requestScopes(scope)
+        }
+        val signInOptions = builder.build()
+        GoogleSignIn.getClient(activity, signInOptions)
+            )
+    }
     public synchronized GoogleSignInClient getGoogleSignInClient() {
         //GoogleSignInOptions.Builder builder = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN);
         GoogleSignInOptions.Builder builder = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN);
